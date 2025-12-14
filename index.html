@@ -1,0 +1,125 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advanced Online Shopping Website</title>
+  <style>
+    *{box-sizing:border-box;font-family:Arial,sans-serif}
+    body{margin:0;background:#f5f5f5}
+    header{background:#232f3e;color:#fff;padding:10px;display:flex;gap:10px;align-items:center}
+    header h1{margin:0;font-size:20px}
+    .search input,.category select{padding:6px}
+    .cart-btn{background:#febd69;border:none;padding:6px 10px;font-weight:bold;cursor:pointer}
+    .container{padding:15px}
+    .products{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px}
+    .product{background:#fff;padding:10px;border-radius:6px;box-shadow:0 2px 5px rgba(0,0,0,.1)}
+    .product h4{margin:5px 0}
+    .product button{width:100%;padding:6px;background:#ff9900;border:none;cursor:pointer}
+    .cart,.login{background:#fff;padding:15px;border-radius:6px;display:none;margin-top:15px}
+    .cart-item{display:flex;justify-content:space-between;margin:5px 0}
+  </style>
+</head>
+<body><header>
+  <h1 onclick="goHome()" style="cursor:pointer">My Shop</h1>
+  <div class="search"><input id="search" placeholder="Search" onkeyup="renderProducts()"></div>
+  <div class="category">
+    <select id="category" onchange="renderProducts()">
+      <option value="all">All</option>
+      <option value="electronics">Electronics</option>
+      <option value="fashion">Fashion</option>
+      <option value="home">Home</option>
+    </select>
+  </div>
+  <button class="cart-btn" onclick="openPage('cart')">Cart (<span id="cartCount">0</span>)</button>
+  <button class="cart-btn" onclick="openPage('login')">Login</button>
+</header><div class="container">
+  <div class="products" id="productList"></div>  <div class="cart" id="productDetail" style="display:none"></div>  <div class="cart" id="cart">
+    <h3>Cart</h3>
+    <div id="cartItems"></div>
+  </div>  <div class="login" id="login">
+    <h3>Login</h3>
+    <input id="username" placeholder="Username"><br><br>
+    <input id="password" type="password" placeholder="Password"><br><br>
+    <button onclick="login()">Login</button>
+    <p id="loginMsg"></p>
+  </div>
+</div><script>
+  // 500 Products Auto Generate
+  const products=[];
+  const categories=['electronics','fashion','home'];
+  for(let i=1;i<=500;i++){
+    products.push({
+      name:'Product '+i,
+      price:Math.floor(Math.random()*5000)+500,
+      category:categories[i%3],
+      image:`https://via.placeholder.com/200x150?text=${categories[i%3]}+${i}`
+    });
+  }
+
+  let cart=[];
+
+  function renderProducts(){
+    const list=document.getElementById('productList');
+    const search=document.getElementById('search').value.toLowerCase();
+    const cat=document.getElementById('category').value;
+    list.innerHTML='';
+
+    products.filter(p=>{
+      return (cat==='all'||p.category===cat) && p.name.toLowerCase().includes(search);
+    }).forEach(p=>{
+      const d=document.createElement('div');
+      d.className='product';
+      d.innerHTML=`<div onclick=\"openProduct(${products.indexOf(p)})\" style=\"cursor:pointer\"><img src="${p.image}" style="width:100%;height:120px;object-fit:cover;border-radius:4px"><h4>${p.name}</h4></div><p>₹${p.price}</p><p>${p.category}</p><button onclick="addToCart('${p.name}',${p.price})">Add</button>`;
+      list.appendChild(d);
+    });
+  }
+
+  function openProduct(index){
+    const p=products[index];
+    document.getElementById('productList').style.display='none';
+    document.getElementById('cart').style.display='none';
+    document.getElementById('login').style.display='none';
+    const pd=document.getElementById('productDetail');
+    pd.style.display='block';
+    pd.innerHTML=`<h2>${p.name}</h2>
+      <img src="${p.image}" style="width:100%;max-width:300px">
+      <p><b>Price:</b> ₹${p.price}</p>
+      <p><b>Category:</b> ${p.category}</p>
+      <button onclick=\"addToCart('${p.name}',${p.price})\">Add to Cart</button>
+      <br><br><button onclick=\"goHome()\">Back</button>`;
+  }
+
+  function addToCart(name,price){cart.push({name,price});updateCart()}
+  function updateCart(){
+    document.getElementById('cartCount').innerText=cart.length;
+    const ci=document.getElementById('cartItems');ci.innerHTML='';
+    cart.forEach(i=>{ci.innerHTML+=`<div class='cart-item'><span>${i.name}</span><span>₹${i.price}</span></div>`})
+  }
+
+  function openPage(id){
+    // hide all sections
+    document.getElementById('productList').style.display='none';
+    document.getElementById('cart').style.display='none';
+    document.getElementById('login').style.display='none';
+
+    // show selected page
+    if(id==='cart') document.getElementById('cart').style.display='block';
+    if(id==='login') document.getElementById('login').style.display='block';
+  }
+
+  function goHome(){
+    document.getElementById('productList').style.display='grid';
+    document.getElementById('cart').style.display='none';
+    document.getElementById('login').style.display='none';
+  }
+
+  // Simple Login
+  function login(){
+    const u=username.value,p=password.value;
+    if(u&&p){localStorage.setItem('user',u);loginMsg.innerText='Login successful'}
+    else loginMsg.innerText='Enter details';
+  }
+
+  renderProducts();
+</script></body>
+</html>
